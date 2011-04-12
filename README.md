@@ -1,7 +1,7 @@
 oplog
 =====
 
-oplog is an operations log.
+oplog is a collection of log aggregation tools.
 
 ### Getting Started
 
