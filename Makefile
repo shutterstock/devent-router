@@ -1,22 +1,31 @@
-CC=gcc
-CFLAGS=-I. -lzmq
-SRC=src
+LIBEVENT ?= /usr/local
+LIBSIMPLEHTTP ?= /usr/local
+LIBZMQ ?= /usr/local
+
+CFLAGS = -I. -I$(LIBZMQ)/include -Wall -O2
+LIBS = -L. -L$(LIBZMQ)/lib -lzmq
+SRC = src
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: oplog-hub oplog-recv oplog-send
+all: zlog-http zlog-hub zlog-recv zlog-send
 
-oplog-hub: $(SRC)/hub.o
-	$(CC) -o $@ $^ $(CFLAGS)
+zlog-http: $(SRC)/http.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -I$(LIBEVENT)/include \
+		-I$(LIBSIMPLEHTTP)/include -L$(LIBEVENT)/lib -L$(LIBSIMPLEHTTP)/lib -levent \
+		-lsimplehttp -lm
 
-oplog-recv: $(SRC)/recv.o
-	$(CC) -o $@ $^ $(CFLAGS)
+zlog-hub: $(SRC)/hub.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-oplog-send: $(SRC)/send.o
-	$(CC) -o $@ $^ $(CFLAGS)
+zlog-recv: $(SRC)/recv.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+zlog-send: $(SRC)/send.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 
 clean:
-	rm -f oplog-* $(SRC)/*.o
+	rm -f zlog-* $(SRC)/*.o

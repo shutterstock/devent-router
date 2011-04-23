@@ -1,26 +1,26 @@
-oplog
-=====
+zlog
+====
 
-oplog is a collection of log aggregation tools.
+zlog is a collection of log aggregation tools.
 
 ### Getting Started
 
-First build oplog:
+First build zlog:
 
     make
 
-Next start `oplog-hub` and `oplog-recv`:
+Next start `zlog-hub` and `zlog-recv`:
 
-    ./oplog-hub 'tcp://*:5555' 'tcp://*:5556' &
-    ./oplog-recv 'tcp://*:5556'
+    ./zlog-hub 'tcp://*:5555' 'tcp://*:5556' &
+    ./zlog-recv 'tcp://*:5556'
 
-In a new window open another instance of `oplog-recv`:
+In a new window open another instance of `zlog-recv`:
 
-    ./oplog-recv 'tcp://*:5556'
+    ./zlog-recv 'tcp://*:5556'
 
-And in one more window run `oplog-send`:
+And in one more window run `zlog-send`:
 
-    echo "hello world" | ./oplog-send 'tcp://*:5555'
+    echo "hello world" | ./zlog-send 'tcp://*:5555'
 
 ### Requirements
 
