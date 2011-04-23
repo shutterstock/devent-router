@@ -9,7 +9,7 @@ SRC = src
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: zlog-http zlog-hub zlog-recv zlog-send
+all: zlog-hub zlog-recv zlog-send
 
 zlog-http: $(SRC)/http.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -I$(LIBEVENT)/include \
