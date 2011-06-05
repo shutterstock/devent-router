@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     if (config.hwm > 0) {
         rc = zmq_setsockopt(pub_socket, ZMQ_HWM, &config.hwm, sizeof(config.hwm));
         if (rc != 0)
-            errx(EXIT_FAILURE, "failed to set high-water mark \"%i\"", config.hwm);
+            errx(EXIT_FAILURE, "failed to set high-water mark \"%"PRIu64"\"", config.hwm);
     }
 
     if (config.swap > 0) {
@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
         rc = zmq_setsockopt(pub_socket, ZMQ_SWAP, &config.swap, sizeof(config.swap));
 
         if (rc != 0)
-            errx(EXIT_FAILURE, "failed to set swap size \"%i\"", config.swap);
+            errx(EXIT_FAILURE, "failed to set swap size \"%"PRIu64"\"", config.swap);
     }
 
     rc = zmq_bind(pull_socket, config.pull);
