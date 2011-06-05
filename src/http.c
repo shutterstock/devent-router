@@ -55,8 +55,12 @@ static void setup_config(int argc, char **argv) {
         } else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
             usage(argv[0]);
             exit(EXIT_SUCCESS);
-        } else if (p == 0) {
-            config.push = argv[i];
+        } else if (argv[i][0] != '-') {
+            switch (p) {
+                case 0:
+                    config.push = argv[i];
+                    break;
+            }
             p++;
         } else {
             usage(argv[0]);
@@ -113,7 +117,7 @@ int main(int argc, char **argv) {
     if (config.hwm > 0) {
         rc = zmq_setsockopt(socket, ZMQ_HWM, &config.hwm, sizeof(config.hwm));
         if (rc != 0)
-            errx(EXIT_FAILURE, "failed to set high-water mark \"" PRIu64 "\"", config.hwm);
+            errx(EXIT_FAILURE, "failed to set high-water mark \"%"PRIu64"\"", config.hwm);
     }
 
     if (config.swap > 0) {
@@ -123,7 +127,7 @@ int main(int argc, char **argv) {
         rc = zmq_setsockopt(socket, ZMQ_SWAP, &config.swap, sizeof(config.swap));
 
         if (rc != 0)
-            errx(EXIT_FAILURE, "failed to set swap size \"" PRIu64 "\"", config.swap);
+            errx(EXIT_FAILURE, "failed to set swap size \"%"PRIu64"\"", config.swap);
     }
 
     rc = zmq_connect(socket, config.push);
