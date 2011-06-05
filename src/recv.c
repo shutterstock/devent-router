@@ -2,12 +2,12 @@
 #include "third_party/zguide/zhelpers.h"
 
 static struct config {
-    char *filter;
+    char *topic;
     char *sub;
 } config;
 
 static void usage(char *name) {
-    printf("Usage: %s [OPTION...] SUB [FILTER]\n\n", name);
+    printf("Usage: %s [OPTION...] SUB [TOPIC]\n\n", name);
     printf("  -h, --help    display this help list\n");
     printf("\n");
 }
@@ -15,18 +15,22 @@ static void usage(char *name) {
 static void setup_config(int argc, char **argv) {
     int i, p = 0;
 
-    config.filter = NULL;
+    config.topic = NULL;
     config.sub = NULL;
 
     for (i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
             usage(argv[0]);
             exit(EXIT_SUCCESS);
-        } else if (p == 0) {
-            config.sub = argv[i];
-            p++;
-        } else if (p == 1) {
-            config.filter = argv[i];
+        } else if (argv[i][0] != '-') {
+            switch (p) {
+                case 0:
+                    config.sub = argv[i];
+                    break;
+                case 1:
+                    config.topic = argv[i];
+                    break;
+            }
             p++;
         } else {
             usage(argv[0]);
@@ -51,10 +55,10 @@ int main(int argc, char **argv) {
     void *socket = zmq_socket(context, ZMQ_SUB);
     assert(socket);
 
-    if (config.filter == NULL) {
+    if (config.topic == NULL) {
         zmq_setsockopt(socket, ZMQ_SUBSCRIBE, "", 0);
     } else {
-        zmq_setsockopt(socket, ZMQ_SUBSCRIBE, config.filter, strlen(config.filter));
+        zmq_setsockopt(socket, ZMQ_SUBSCRIBE, config.topic, strlen(config.topic));
     }
 
     rc = zmq_connect(socket, config.sub);
@@ -63,10 +67,34 @@ int main(int argc, char **argv) {
 
     s_catch_signals();
 
+    size_t size = 0;
     char *line = NULL;
 
     while (!s_interrupted) {
-        line = s_recv(socket);
+        zmq_msg_t topic;
+        zmq_msg_t body;
+
+        zmq_msg_init(&topic);
+        zmq_msg_init(&body);
+
+        if (!zmq_recv(socket, &topic, 0)) {
+            int64_t more;
+            size_t more_size = sizeof(more);
+
+            zmq_msg_close(&topic);
+
+            zmq_getsockopt(socket, ZMQ_RCVMORE, &more, &more_size);
+
+            if (more) {
+                zmq_recv(socket, &body, 0);
+                size = zmq_msg_size(&body);
+                line = malloc(size+1);
+                memcpy(line, zmq_msg_data(&body), size);
+                zmq_msg_close(&body);
+                line[size] = '\0';
+            }
+        }
+
         if (line) {
             printf("%s\n", line);
             free(line);

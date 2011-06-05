@@ -3,12 +3,13 @@
 
 static struct config {
     char *push;
+    char *topic;
     uint64_t hwm;
     uint64_t swap;
 } config;
 
 static void usage(char *name) {
-    printf("Usage: %s [OPTION...] PUSH\n\n", name);
+    printf("Usage: %s [OPTION...] PUSH TOPIC\n\n", name);
     printf("      --hwm     set high-water mark (number of messages)\n");
     printf("      --swap    set swap size (bytes)\n");
     printf("  -h, --help    display this help list\n");
@@ -19,6 +20,7 @@ static void setup_config(int argc, char **argv) {
     int i, p = 0;
 
     config.push = NULL;
+    config.topic = NULL;
     config.hwm = 0;
     config.swap = 0;
 
@@ -32,8 +34,15 @@ static void setup_config(int argc, char **argv) {
         } else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
             usage(argv[0]);
             exit(EXIT_SUCCESS);
-        } else if (p == 0) {
-            config.push = argv[i];
+        } else if (argv[i][0] != '-') {
+            switch (p) {
+                case 0:
+                    config.push = argv[i];
+                    break;
+                case 1:
+                    config.topic = argv[i];
+                    break;
+            }
             p++;
         } else {
             usage(argv[0]);
@@ -53,7 +62,12 @@ int main(int argc, char **argv) {
 
     if (config.push == NULL) {
         usage(argv[0]);
-        errx(EXIT_FAILURE, "no push option set");
+        errx(EXIT_FAILURE, "topic argument is required");
+    }
+
+    if (config.topic == NULL) {
+        usage(argv[0]);
+        errx(EXIT_FAILURE, "topic argument is required");
     }
 
     void *context = zmq_init(1);
@@ -85,18 +99,27 @@ int main(int argc, char **argv) {
     s_catch_signals();
 
     char *line = NULL;
-    size_t line_length, read_length = 0;
+    size_t line_length = 0;
+    size_t read_length = 0;
+    size_t topic_length = strlen(config.topic);
 
     while ((read_length = getline(&line, &line_length, stdin)) != -1 && !s_interrupted) {
-        zmq_msg_t message;
+        zmq_msg_t topic;
+        zmq_msg_t body;
 
         // Remove newline
         line[--read_length] = '\0';
 
         if (read_length > 0) {
-            zmq_msg_init_data(&message, line, read_length, free_line, NULL);
-            zmq_send(socket, &message, 0);
-            zmq_msg_close(&message);
+            // TODO(ssewell): use zmq_msg_copy (couldn't get it to work)
+            zmq_msg_init_size(&topic, topic_length);
+            memcpy(zmq_msg_data(&topic), config.topic, topic_length);
+            zmq_send(socket, &topic, ZMQ_SNDMORE);
+            zmq_msg_close(&topic);
+
+            zmq_msg_init_data(&body, line, read_length, free_line, NULL);
+            zmq_send(socket, &body, 0);
+            zmq_msg_close(&body);
         } else {
             free(line);
         }

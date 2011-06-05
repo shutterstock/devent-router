@@ -34,11 +34,15 @@ static void setup_config(int argc, char **argv) {
         } else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
             usage(argv[0]);
             exit(EXIT_SUCCESS);
-        } else if (p == 0) {
-            config.pull = argv[i];
-            p++;
-        } else if (p == 1) {
-            config.pub = argv[i];
+        } else if (argv[i][0] != '-') {
+            switch (p) {
+                case 0:
+                    config.pull = argv[i];
+                    break;
+                case 1:
+                    config.pub = argv[i];
+                    break;
+            }
             p++;
         } else {
             usage(argv[0]);
