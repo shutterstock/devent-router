@@ -12,15 +12,16 @@ First build zlog:
 Next start `zlog-hub` and `zlog-recv`:
 
     ./zlog-hub 'tcp://*:5555' 'tcp://*:5556' &
-    ./zlog-recv 'tcp://*:5556'
+    ./zlog-recv 'tcp://*:5556' mytopic
 
 In a new window open another instance of `zlog-recv`:
 
-    ./zlog-recv 'tcp://*:5556'
+    ./zlog-recv 'tcp://*:5556' mytopic.second
 
 And in one more window run `zlog-send`:
 
-    echo "hello world" | ./zlog-send 'tcp://*:5555'
+    echo "both topics" | ./zlog-send 'tcp://*:5555' mytopic
+    echo "only second topic" | ./zlog-send 'tcp://*:5555' mytopic.second
 
 ### Requirements
 
