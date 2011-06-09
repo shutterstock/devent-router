@@ -2,9 +2,11 @@ LIBEVENT ?= /usr/local
 LIBSIMPLEHTTP ?= /usr/local
 LIBZMQ ?= /usr/local
 
-CFLAGS = -I. -I$(LIBZMQ)/include -Wall -O2
-LIBS = -L. -L$(LIBZMQ)/lib -lzmq
-SRC = src
+PREFIX ?= /usr/local
+
+CFLAGS = -I. -I$(LIBZMQ)/include -Wall -O2 $(CFLAGS_EXTRA)
+LIBS = -L. -L$(LIBZMQ)/lib -lzmq $(LIBS_EXTRA)
+SRC ?= src
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
@@ -25,7 +27,12 @@ zlog-recv: $(SRC)/recv.o
 zlog-send: $(SRC)/send.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-.PHONY: clean
+.PHONY: clean install
+
+install:
+	/usr/bin/install -D zlog-hub $(PREFIX)/bin
+	/usr/bin/install -D zlog-recv $(PREFIX)/bin
+	/usr/bin/install -D zlog-send $(PREFIX)/bin
 
 clean:
 	rm -f zlog-* $(SRC)/*.o
