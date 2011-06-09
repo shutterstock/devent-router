@@ -30,9 +30,9 @@ zlog-send: $(SRC)/send.o
 .PHONY: clean install
 
 install:
-	/usr/bin/install -D zlog-hub $(PREFIX)/bin
-	/usr/bin/install -D zlog-recv $(PREFIX)/bin
-	/usr/bin/install -D zlog-send $(PREFIX)/bin
+	/usr/bin/install -p -D -m 755 zlog-hub $(PREFIX)/bin/zlog-hub
+	/usr/bin/install -p -D -m 755 zlog-recv $(PREFIX)/bin/zlog-recv
+	/usr/bin/install -p -D -m 755 zlog-send $(PREFIX)/bin/zlog-send
 
 clean:
 	rm -f zlog-* $(SRC)/*.o
