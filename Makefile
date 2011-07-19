@@ -11,28 +11,28 @@ SRC ?= src
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: zlog-hub zlog-recv zlog-send
+all: dr-hub dr-recv dr-send
 
-zlog-http: $(SRC)/http.o
+dr-http: $(SRC)/http.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -I$(LIBEVENT)/include \
 		-I$(LIBSIMPLEHTTP)/include -L$(LIBEVENT)/lib -L$(LIBSIMPLEHTTP)/lib -levent \
 		-lsimplehttp -lm
 
-zlog-hub: $(SRC)/hub.o
+dr-hub: $(SRC)/hub.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-zlog-recv: $(SRC)/recv.o
+dr-recv: $(SRC)/recv.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-zlog-send: $(SRC)/send.o
+dr-send: $(SRC)/send.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean install
 
 install:
-	/usr/bin/install -p -D -m 755 zlog-hub $(PREFIX)/bin/zlog-hub
-	/usr/bin/install -p -D -m 755 zlog-recv $(PREFIX)/bin/zlog-recv
-	/usr/bin/install -p -D -m 755 zlog-send $(PREFIX)/bin/zlog-send
+	/usr/bin/install -p -D -m 755 dr-hub $(PREFIX)/bin/dr-hub
+	/usr/bin/install -p -D -m 755 dr-recv $(PREFIX)/bin/dr-recv
+	/usr/bin/install -p -D -m 755 dr-send $(PREFIX)/bin/dr-send
 
 clean:
-	rm -f zlog-* $(SRC)/*.o
+	rm -f dr-* $(SRC)/*.o

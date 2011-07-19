@@ -1,27 +1,27 @@
-zlog
-====
+devent-router
+=============
 
-zlog is a collection of log aggregation tools.
+devent-router is a collection of event aggregation tools.
 
 ### Getting Started
 
-First build zlog:
+First build devent-router:
 
     make
 
-Next start `zlog-hub` and `zlog-recv`:
+Next start `dr-hub` and `dr-recv`:
 
-    ./zlog-hub 'tcp://*:5555' 'tcp://*:5556' &
-    ./zlog-recv 'tcp://*:5556' mytopic
+    ./dr-hub 'tcp://*:5555' 'tcp://*:5556' &
+    ./dr-recv 'tcp://*:5556' mytopic
 
-In a new window open another instance of `zlog-recv`:
+In a new window open another instance of `dr-recv`:
 
-    ./zlog-recv 'tcp://*:5556' mytopic.second
+    ./dr-recv 'tcp://*:5556' mytopic.second
 
-And in one more window run `zlog-send`:
+And in one more window run `dr-send`:
 
-    echo "both topics" | ./zlog-send 'tcp://*:5555' mytopic
-    echo "only second topic" | ./zlog-send 'tcp://*:5555' mytopic.second
+    echo "both topics" | ./dr-send 'tcp://*:5555' mytopic
+    echo "only second topic" | ./dr-send 'tcp://*:5555' mytopic.second
 
 ### Requirements
 
