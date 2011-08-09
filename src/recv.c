@@ -4,11 +4,13 @@
 static struct config {
     char *topic;
     char *sub;
+    int  show_topic;
 } config;
 
 static void usage(char *name) {
     printf("Usage: %s [OPTION...] SUB [TOPIC]\n\n", name);
     printf("  -h, --help    display this help list\n");
+    printf("  --show-topic  prefix lines with topic\n");
     printf("\n");
 }
 
@@ -17,11 +19,14 @@ static void setup_config(int argc, char **argv) {
 
     config.topic = NULL;
     config.sub = NULL;
+    config.show_topic = 0;
 
     for (i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
             usage(argv[0]);
             exit(EXIT_SUCCESS);
+        } else if (!strcmp(argv[i], "--show-topic")) {
+            config.show_topic = 1;
         } else if (argv[i][0] != '-') {
             switch (p) {
                 case 0:
@@ -69,6 +74,7 @@ int main(int argc, char **argv) {
 
     size_t size = 0;
     char *line = NULL;
+    char *prefix = NULL;
 
     while (!s_interrupted) {
         zmq_msg_t topic;
@@ -81,7 +87,12 @@ int main(int argc, char **argv) {
             int64_t more;
             size_t more_size = sizeof(more);
 
+            // Get topic name
+            size = zmq_msg_size(&topic);
+            prefix = malloc(size+1);
+            memcpy(prefix, zmq_msg_data(&topic), size);
             zmq_msg_close(&topic);
+            prefix[size] = '\0';
 
             zmq_getsockopt(socket, ZMQ_RCVMORE, &more, &more_size);
 
@@ -95,10 +106,14 @@ int main(int argc, char **argv) {
             }
         }
 
-        if (line) {
+        if (config.show_topic && prefix && line) {
+            printf("%s\t%s\n", prefix, line);
+        } else if (line) {
             printf("%s\n", line);
-            free(line);
         }
+        if (prefix) free(prefix);
+        if (line) free(line);
+        prefix = NULL;
         line = NULL;
     }
 
