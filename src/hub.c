@@ -102,23 +102,20 @@ int main(int argc, char **argv) {
     s_catch_signals();
 
     while (!s_interrupted) {
-        while (!s_interrupted) {
-            int64_t more;
-            size_t more_size = sizeof(more);
+        int64_t more;
+        size_t more_size = sizeof(more);
 
-            zmq_msg_t message;
-            zmq_msg_init(&message);
+        zmq_msg_t message;
+        zmq_msg_init(&message);
 
-            if (zmq_recv(pull_socket, &message, 0))
-                break;
-
-            zmq_getsockopt(pull_socket, ZMQ_RCVMORE, &more, &more_size);
-            zmq_send(pub_socket, &message, more ? ZMQ_SNDMORE : 0);
+        if (zmq_recv(pull_socket, &message, 0)) {
             zmq_msg_close(&message);
-
-            if (!more)
-                break;
+            continue;
         }
+
+        zmq_getsockopt(pull_socket, ZMQ_RCVMORE, &more, &more_size);
+        zmq_send(pub_socket, &message, more ? ZMQ_SNDMORE : 0);
+        zmq_msg_close(&message);
     }
 
     zmq_close(pull_socket);
