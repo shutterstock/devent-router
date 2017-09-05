@@ -29,4 +29,4 @@ And in one more window run `dr-send`:
 
 ### License
 
-This work is licensed under the MIT License (see the LICENSE file).
+[MIT](LICENSE) © 2011-2017 Shutterstock Images, LLC
